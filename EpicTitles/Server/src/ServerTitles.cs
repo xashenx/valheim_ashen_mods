@@ -41,7 +41,7 @@ namespace EpicTitles
                 Log.LogInfo($"Sending notification of SkillRankUp of {playerName} on {skill}");
                 NotifityOtherClients(sender, $"{playerName} is now a {Common.getSkillRank(level)} {Common.getSkillTitle(skill)}!");
             }
-            Log.LogInfo(String.Format("{0}: {1} {2} {3}", sender, skill, level, playerName));
+            // Log.LogInfo($"{0}: {1} {2} {3}", sender, skill, level, playerName));
         }
 
         static void NotifityOtherClients(long sender, String message){

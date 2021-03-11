@@ -73,7 +73,7 @@ namespace EpicTitles
                 Chat.instance.SendText(Talker.Type.Shout, message);
                 ShowMessage(message);
                 // Log.LogInfo(string.Format("SkillUp: {0} => {1} ({2} {3})", skill, levelInt, rank, title));
-                Log.LogInfo($"SkillUp: {skill} => {levelInt} ({rank} {title})");
+                // Log.LogInfo($"SkillUp: {skill} => {levelInt} ({rank} {title})");
             }
 
             // send update to the server
@@ -92,7 +92,7 @@ namespace EpicTitles
 
         static void sendSkillUpdate(Skills.SkillType skill, float level){
             ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.Everybody, "SkillUpdate", Player.m_localPlayer.GetPlayerName(), String.Format("{0}", skill), (int)level);
-            Log.LogInfo(string.Format("SkillUpdateSent"));
+            Log.LogInfo("SkillUpdateSent");
             // Log.LogInfo();
             
             // !ZNet.instance.IsServer())
