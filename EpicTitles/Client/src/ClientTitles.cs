@@ -77,7 +77,10 @@ namespace EpicTitles
             }
 
             // send update to the server
-            sendSkillUpdate(skill, level);
+            // sendSkillUpdate(skill, level);
+            // ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.Everybody, "SkillUpdate", Player.m_localPlayer.GetPlayerName(), skill.ToString(), (int)level);
+            ZRoutedRpc.instance.InvokeRoutedRPC("SkillUpdate", Player.m_localPlayer.GetPlayerName(), skill.ToString(), (int)level);
+            Log.LogInfo("SkillUpdateSent");
 
             // TODO retrieve a list of the skills with the current value
             // Skills char_skills = __instance.GetSkills();
@@ -88,14 +91,6 @@ namespace EpicTitles
 
         static void ShowMessage(string message){
             MessageHud.instance.ShowMessage(MessageHud.MessageType.Center, message);
-        }
-
-        static void sendSkillUpdate(Skills.SkillType skill, float level){
-            ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.Everybody, "SkillUpdate", Player.m_localPlayer.GetPlayerName(), String.Format("{0}", skill), (int)level);
-            Log.LogInfo("SkillUpdateSent");
-            // Log.LogInfo();
-            
-            // !ZNet.instance.IsServer())
         }
 
         static void SkillRankUpNotification(long sender, String message){

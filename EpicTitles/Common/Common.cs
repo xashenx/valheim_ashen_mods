@@ -1,7 +1,31 @@
+using System;
 
 namespace EpicTitles
 {
     class Common{
+        public enum SkillType
+        {
+            None,
+            Swords,
+            Knives,
+            Clubs,
+            Polearms,
+            Spears,
+            Blocking,
+            Axes,
+            Bows,
+            FireMagic,
+            FrostMagic,
+            Unarmed,
+            Pickaxes,
+            WoodCutting,
+            Jump = 100,
+            Sneak,
+            Run,
+            Swim,
+            All = 999
+        }
+
         public static string getSkillRank(byte level){
             string rank = "";
             if (level < 10) rank = "Neophyte";
@@ -19,51 +43,57 @@ namespace EpicTitles
 
         public static string getSkillTitle(string skillName){
             string title = "";
-            switch (skillName){
-                case "Axe":
+            switch (Enum.Parse(typeof(SkillType), skillName)){
+                case SkillType.Axes:
                     title = "Axeman";
                     break;
-                case "Blocking":
+                case SkillType.Blocking:
                     title = "Duelist";
                     break;
-                case "Bows":
+                case SkillType.Bows:
                     title = "Archer";
                     break;
-                case "Clubs":
+                case SkillType.Clubs:
                     title = "Maceman";
                     break;
-                case "Jump":
+                case SkillType.Jump:
                     title = "Jumpy";
                     break;
-                case "Knives":
+                case SkillType.Knives:
                     title = "Assassin";
                     break;
-                case "Pickaxes":
+                case SkillType.Pickaxes:
                     title = "Miner";
                     break;
-                case "Run":
+                case SkillType.Run:
                     title = "Marathoner";
                     break;
-                case "Polearms":
+                case SkillType.Polearms:
                     title = "Polearmsman";
                     break;
-                case "Sneak":
+                case SkillType.Sneak:
                     title = "Ninja";
                     break;
-                case "Spears":
+                case SkillType.Spears:
                     title = "Spearman";
                     break;
-                case "Swim":
+                case SkillType.Swim:
                     title = "Fish'a'like";
                     break;
-                case "Swords":
+                case SkillType.Swords:
                     title = "Swordsman";
                     break;
-                case "Unarmed":
+                case SkillType.Unarmed:
                     title = "Wrestler";
                     break;
-                case "WoodCutting":
+                case SkillType.WoodCutting:
                     title = "Lumberjack";
+                    break;
+                case SkillType.FireMagic:
+                    title = "Fire Wizard";
+                    break;
+                case SkillType.FrostMagic:
+                    title = "Frost Wizard";
                     break;
                 default:
                     title = "SkillNotFound";
