@@ -2,7 +2,7 @@
 namespace EpicTitles
 {
     class Common{
-        public static string getSkillRank(float level){
+        public static string getSkillRank(byte level){
             string rank = "";
             if (level < 10) rank = "Neophyte";
             else if (level < 20) rank = "Novice";
@@ -42,7 +42,7 @@ namespace EpicTitles
                     title = "Miner";
                     break;
                 case "Run":
-                    title = "Runner";
+                    title = "Marathoner";
                     break;
                 case "Polearms":
                     title = "Polearmsman";
@@ -54,7 +54,7 @@ namespace EpicTitles
                     title = "Spearman";
                     break;
                 case "Swim":
-                    title = "Swimmer";
+                    title = "Fish'a'like";
                     break;
                 case "Swords":
                     title = "Swordsman";
@@ -62,7 +62,7 @@ namespace EpicTitles
                 case "Unarmed":
                     title = "Wrestler";
                     break;
-                case "Wood Cutting":
+                case "WoodCutting":
                     title = "Lumberjack";
                     break;
                 default:

@@ -1,7 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-// using System.Collections.Generic;
+using System.Collections.Generic;
 // using System.Reflection;
 using UnityEngine;
 using System;
@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace EpicTitles
 {
-    [BepInPlugin("net.bdew.valheim.epictitles", "EpicTitles", "0.2")]
+    [BepInPlugin("net.bdew.valheim.epictitles", "EpicTitles", "0.3")]
     class EpicTitles : BaseUnityPlugin {
         public static ManualLogSource Log;
 
@@ -62,7 +62,7 @@ namespace EpicTitles
         [HarmonyPrefix]
         static void CheckSkills(Player __instance, Skills.SkillType skill, float level) {
             string title = Common.getSkillTitle(string.Format("{0}", skill));
-            string rank = Common.getSkillRank(level);
+            string rank = Common.getSkillRank((byte)level);
             int levelInt = (int)level;
             string message = "";
             // Log.LogInfo(string.Format("SkillUp: {0} => {1} ({2} {3})", skill, levelInt, rank, title));

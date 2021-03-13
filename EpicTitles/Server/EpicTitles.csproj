@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>EpicTitles</RootNamespace>
     <AssemblyName>EpicTitles</AssemblyName>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>v5.0</TargetFramework>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -80,9 +80,11 @@
     <Reference Include="UnityEngine.UnityConnectModule">
       <HintPath>$(GAMEDIR)\valheim_Data\Managed\UnityEngine.UnityConnectModule.dll</HintPath>
     </Reference> -->
+    <!-- <Reference Include="netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" /> -->
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <!-- <Reference Include="System.Runtime.Serialization" /> -->
     <!-- <Reference Include="System.Xml" /> -->
     <!-- <Reference Include="System.Xml.Linq" /> -->
     <!-- <Reference Include="System.Data.DataSetExtensions" /> -->
@@ -102,12 +104,16 @@
     <Reference Include="UnityEngine.UI">
       <HintPath>$(GAMEDIR)\valheim_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
+    <!-- <Reference Include="Newtonsoft.Json">
+      <HintPath>Newtonsoft.Json.dll</HintPath>
+    </Reference> -->
   </ItemGroup>
   <ItemGroup>
     <!-- <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\DestructiblePatchSpawn.cs" />
     <Compile Include="src\Mod.cs" /> -->
     <Compile Include="src\ServerTitles.cs" />
+    <Compile Include="src\MiniJSON.cs" />
     <Compile Include="..\Common\Common.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
