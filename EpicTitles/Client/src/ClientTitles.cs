@@ -70,7 +70,7 @@ namespace EpicTitles
             // check if a new rank has been acquired
             if (levelInt % 10 == 0){
                 message = string.Format("I'm {0} {1} now. ({2})", rank, title, levelInt);
-                Chat.instance.SendText(Talker.Type.Shout, message);
+                // Chat.instance.SendText(Talker.Type.Shout, message);
                 ShowMessage(message);
                 // Log.LogInfo(string.Format("SkillUp: {0} => {1} ({2} {3})", skill, levelInt, rank, title));
                 // Log.LogInfo($"SkillUp: {skill} => {levelInt} ({rank} {title})");
@@ -96,6 +96,13 @@ namespace EpicTitles
         static void SkillRankUpNotification(long sender, String message){
             Log.LogInfo($"SkillRankUpNotification from {sender}: {message}");
             ShowMessage(message);
+        }
+
+        [HarmonyPatch(typeof (Chat), "OnNewChatMessage")]
+        [HarmonyPostfix]
+        private static void checkForLadderCommands(long senderID, string text){
+            Log.LogInfo("YESSS");
+            Log.LogInfo($"{senderID} {text}");
         }
     }
 }

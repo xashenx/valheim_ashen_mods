@@ -48,6 +48,8 @@ namespace EpicTitles
             if (byteLevel % 10 == 0) {
                 // send the notification to other peers
                 Log.LogInfo($"Sending notification of SkillRankUp of {playerName} on {skill}");
+                var _playerName = playerName;
+                if (playerName == "Tomu") _playerName = "Paloma";
                 NotifityOtherClients(sender, $"{playerName} is now a {Common.getSkillRank(byteLevel)} {Common.getSkillTitle(skill)}!");
             }
             if (skillLadders.ContainsKey(skill))
@@ -125,5 +127,29 @@ namespace EpicTitles
             File.WriteAllText(@"SkillLadders.json", MiniJSON.Json.Serialize(skillLadders));
             Log.LogInfo("SkillLadders saved to file");
         }
+
+        // [HarmonyPatch(typeof (Chat), "OnNewChatMessage")]
+        // [HarmonyPostfix]
+        // private static void checkForLadderCommands(long senderID, string text){
+        //     Log.LogInfo("YESSS");
+        //     Log.LogInfo($"{senderID} {text}");
+        // }
+
+        // [HarmonyPatch(typeof (Chat), "AddInworldText")]
+        // [HarmonyPostfix]
+        // private static void checkForLadderCommands2(long senderID, string text){
+        //     Log.LogInfo("IW");
+        //     Log.LogInfo($"{senderID} {text}");
+        // }
+
+        // [HarmonyPatch(typeof (Console), "InputText")]
+        // [HarmonyPrefix]
+        // private void checkConsole(ref Console __instance){
+        //     Console.instance.AddString("BAZUZU");
+        //     // this.AddString("BAZUZU");
+        //     // Log.LogInfo("IW");
+        //     // Log.LogInfo($"{senderID} {text}");
+        // }
+        
     }
 }
