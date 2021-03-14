@@ -1,11 +1,11 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using System.Collections.Generic;
+// using System.Collections.Generic;
 // using System.Reflection;
-using UnityEngine;
+// using UnityEngine;
 using System;
-using System.Linq;
+// using System.Linq;
 // using System.String;
 // using BepInEx.Configuration;
 
@@ -14,6 +14,7 @@ namespace EpicTitles
     [BepInPlugin("net.bdew.valheim.epictitles", "EpicTitles", "0.3")]
     class EpicTitles : BaseUnityPlugin {
         public static ManualLogSource Log;
+        public static Console console;
 
         void Awake() {
             // var harmony = new Harmony("net.bdew.valheim.testmod");
@@ -23,6 +24,13 @@ namespace EpicTitles
             Harmony.CreateAndPatchAll(typeof(EpicTitles));
         }
 
+        [HarmonyPatch(typeof(Console), "Awake")]
+        [HarmonyPostfix]
+        private static void Console_Awake(ref Console __instance)
+        {
+            console = __instance;
+        }
+
         [HarmonyPatch(typeof(ZNet), "Awake")]
         [HarmonyPostfix]
         private static void ZNet_Awake(ref ZNet __instance)
@@ -30,12 +38,54 @@ namespace EpicTitles
             try
             {
                 ZRoutedRpc.instance.Register<String>("SkillRankUpNotification", SkillRankUpNotification);
+                ZRoutedRpc.instance.Register<String>("LadderResponse", LadderResponse);
+                Log.LogInfo($"isServer: {__instance.IsServer()}");
             }
             catch (Exception e)
             {
                 Log.LogError(e);
             }
         }
+
+        [HarmonyPatch(typeof(Console), "InputText")]
+        [HarmonyPrefix]
+        private static void ConsolePrePatch(ref Console __instance){
+            string text = __instance.m_input.text;
+
+            if (text.StartsWith("ladder")){
+                    ZRoutedRpc.instance.InvokeRoutedRPC("LadderRequest", 
+                        text, Player.m_localPlayer.GetPlayerName());
+                    Log.LogInfo("LadderRequestSent");
+                    return;
+            }
+        }
+
+        [HarmonyPatch(typeof(Console), "InputText")]
+        [HarmonyPostfix]
+        private static void ConsolePostPatch(ref Console __instance){
+            string text = __instance.m_input.text;
+
+            if (text == "help"){
+                __instance.Print("ladder [name] - shows the selected ladder");
+            }
+        }
+
+        // [HarmonyPatch(typeof(Console), "Awake")]
+        // [HarmonyPostfix]
+        // private static void Console_Awake(ref Console __instance)
+        // {
+        //     try
+        //     {
+        //         __instance.AddString("xxxxx");
+        //         __instance.SendMessageUpwards();
+        //         // ZRoutedRpc.instance.Register<String>("SkillRankUpNotification", SkillRankUpNotification);
+        //         // Log.LogInfo($"isServer: {__instance.IsServer()}");
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         Log.LogError(e);
+        //     }
+        // }
 
         // [HarmonyPatch(typeof (ZNet), "OnNewConnection")]
         // private  class ZnetPatchOnNewConnection
@@ -83,7 +133,12 @@ namespace EpicTitles
             Log.LogInfo("SkillUpdateSent");
 
             // TODO retrieve a list of the skills with the current value
-            // Skills char_skills = __instance.GetSkills();
+            // List<Skills.Skill> char_skills = __instance.GetSkills().GetSkillList();
+            //     Log.LogInfo($"{skill.m_info}: {skill.m_level}");
+            // foreach (KeyValuePair<Skills.SkillType, Skills.Skill> keyValuePair in __instance.GetSkills().char_skills)
+            // {
+            //     list.Add(keyValuePair.Value);
+            // }
             // foreach (var skillx in char_skills){
             //     Log.LogInfo(string.Format("Skill: {0}", skillx));
             // }
@@ -94,15 +149,19 @@ namespace EpicTitles
         }
 
         static void SkillRankUpNotification(long sender, String message){
-            Log.LogInfo($"SkillRankUpNotification from {sender}: {message}");
+            Log.LogInfo($"SkillRankUpNotification: {message}");
             ShowMessage(message);
         }
 
-        [HarmonyPatch(typeof (Chat), "OnNewChatMessage")]
-        [HarmonyPostfix]
-        private static void checkForLadderCommands(long senderID, string text){
-            Log.LogInfo("YESSS");
-            Log.LogInfo($"{senderID} {text}");
+        static void LadderResponse(long sender, String message){
+            console.Print(message);
         }
+
+        // [HarmonyPatch(typeof (Chat), "OnNewChatMessage")]
+        // [HarmonyPostfix]
+        // private static void checkForLadderCommands(long senderID, string text){
+        //     Log.LogInfo("YESSS");
+        //     Log.LogInfo($"{senderID} {text}");
+        // }
     }
 }

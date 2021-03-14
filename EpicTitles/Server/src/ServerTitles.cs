@@ -11,10 +11,15 @@ using MiniJSON;
 
 namespace EpicTitles
 {
-    [BepInPlugin("net.bdew.valheim.serverepictitles", "ServerEpicTitles", "0.2")]
+    [BepInPlugin("net.bdew.valheim.serverepictitles", "ServerEpicTitles", "0.5")]
     public class ServerEpicTitles : BaseUnityPlugin {
         public static ManualLogSource Log;
         public static Dictionary<string, Dictionary<string, byte>> skillLadders;
+        public static readonly string ET_DataPath =
+            Paths.BepInExRootPath + Path.DirectorySeparatorChar + "epictitles_data" 
+            + Path.DirectorySeparatorChar;
+
+        public Console console;
 
         void Awake() {
             Log = Logger;
@@ -29,6 +34,7 @@ namespace EpicTitles
             try
             {
                 ZRoutedRpc.instance.Register<String, String, int>("SkillUpdate", OnClientSkillUpdate);
+                ZRoutedRpc.instance.Register<String, String>("LadderRequest", OnClientLadderRequest);
             }
             catch (Exception e)
             {
@@ -43,11 +49,11 @@ namespace EpicTitles
         }
 
         public static void OnClientSkillUpdate(long sender, String playerName, String skill, int level){
-            Log.LogInfo($"Received SkillUpdate from {playerName} on {skill}:{level}");
+            // Log.LogInfo($"Received SkillUpdate from {playerName} on {skill}:{level}");
             var byteLevel = (byte)level;
             if (byteLevel % 10 == 0) {
                 // send the notification to other peers
-                Log.LogInfo($"Sending notification of SkillRankUp of {playerName} on {skill}");
+                // Log.LogInfo($"Sending notification of SkillRankUp of {playerName} on {skill}");
                 var _playerName = playerName;
                 if (playerName == "Tomu") _playerName = "Paloma";
                 NotifityOtherClients(sender, $"{playerName} is now a {Common.getSkillRank(byteLevel)} {Common.getSkillTitle(skill)}!");
@@ -56,8 +62,22 @@ namespace EpicTitles
                 skillLadders[skill][playerName] = byteLevel;
             else
                 skillLadders[skill] = new Dictionary<string, byte>(){{playerName, byteLevel}};
+        }
 
-            getSkillLadder(skill);
+        public static void OnClientLadderRequest(long sender, String request, String player){
+            string response = "";
+            if (request.Length < 8)
+                response = listAvailableLadders();
+            else {
+                string ladderName = request.Substring(7);
+                Log.LogInfo($"Skill ladder request from {sender}: {ladderName}");
+                if (skillLadders.ContainsKey(ladderName))
+                    response = getSkillLadder(ladderName, playerName: player);
+                else
+                    response = listAvailableLadders();
+            }
+
+            ZRoutedRpc.instance.InvokeRoutedRPC(sender, "LadderResponse", response);
         }
 
         static void NotifityOtherClients(long sender, String message){
@@ -82,30 +102,61 @@ namespace EpicTitles
             }
         }
 
-        static void getSkillLadder(string skill){
-            string message;
+        static String getSkillLadder(string skill, string playerName = ""){
+            string message = "";
             if (skillLadders.ContainsKey(skill)){
                 var counter = 1;
                 var _title = Common.getSkillTitle(skill);
-                message = $"Ladder for {skill}\n";
+                var position = 0;
                 foreach (KeyValuePair<string, byte> skillLadder in skillLadders[skill].OrderByDescending(key => key.Value)){
                     var _rank = Common.getSkillRank(skillLadder.Value);
-                    message += $"{counter++}. {skillLadder.Key}, the {_rank} {_title} ({skillLadder.Value})\n";
+                    if (skillLadder.Key == playerName)
+                        position = counter;
+                        // message += $"\n<b>{counter++}. {skillLadder.Key}, the {_rank} {_title} ({skillLadder.Value})</b>";
+                    message += $"\n{counter++}. {skillLadder.Key}, the {_rank} {_title} ({skillLadder.Value})";
                 }
+                var skillUpper = skill.ToUpper();
+                var title = $"===== {skillUpper} LADDER =====";
+                var divider = "";
+                for (int i = 0; i < title.Length; i++)
+                    divider += "=";
+                message = "\n" + divider + message;
+
+                if (position > 0)
+                    message = $"\nYou're in position #{position}!" + message;
+                message = title + message;
             }
             else
                 message = $"There's no ladder for {skill}!";
-            Log.LogInfo(message);
+            return message;
+        }
+
+        static String listAvailableLadders(){
+            string availableLadders = "";
+            foreach (KeyValuePair<string, Dictionary<string, byte>> skillLadder in skillLadders){
+                availableLadders += '\n' + skillLadder.Key;
+            }
+            
+            if (availableLadders == "")
+                availableLadders = "Sorry, there's no ladder available!";
+            else
+                
+                availableLadders = "List of available ladders:" + availableLadders;
+                availableLadders = "===== EPIC TITLES - LADDER =====\n" + availableLadders;
+            return availableLadders;
         }
 
         static void loadSkillLadder(){
             skillLadders = new Dictionary<string, Dictionary<string, byte>>();
-            if (!File.Exists(@"SkillLadders.json")){
+            if (!Directory.Exists(ET_DataPath))
+                Directory.CreateDirectory(ET_DataPath);
+
+            if (!File.Exists(@"" + ET_DataPath + "skill_ladders.json")){
                 Log.LogInfo("No SkillLadders.json ...");
                 return;
             }
 
-            Dictionary<string, object> tmp = MiniJSON.Json.Deserialize(File.ReadAllText(@"SkillLadders.json")) as Dictionary<string, object>;
+            Dictionary<string, object> tmp = MiniJSON.Json.Deserialize(File.ReadAllText(@"" + ET_DataPath + "skill_ladders.json")) as Dictionary<string, object>;
             foreach (KeyValuePair<string, object> _skill in tmp)
             {
                 Dictionary<string, byte> chars = new Dictionary<string, byte>();
@@ -115,16 +166,16 @@ namespace EpicTitles
                 skillLadders.Add(_skill.Key, chars);
             }
 
-            foreach (KeyValuePair<string, Dictionary<string, byte>> skillLadder in skillLadders){
-                foreach (KeyValuePair<string, byte> character in skillLadder.Value)
-                    Log.LogInfo($"{skillLadder.Key}: {character.Key}-{character.Value}");
-            }
+            // foreach (KeyValuePair<string, Dictionary<string, byte>> skillLadder in skillLadders){
+            //     foreach (KeyValuePair<string, byte> character in skillLadder.Value)
+            //         Log.LogInfo($"{skillLadder.Key}: {character.Key}-{character.Value}");
+            // }
 
             Log.LogInfo("SkillLadders loaded from file");
         }
 
         static void saveSkillLadder(){
-            File.WriteAllText(@"SkillLadders.json", MiniJSON.Json.Serialize(skillLadders));
+            File.WriteAllText(@"" + ET_DataPath + "skill_ladders.json", MiniJSON.Json.Serialize(skillLadders));
             Log.LogInfo("SkillLadders saved to file");
         }
 
