@@ -1,5 +1,9 @@
 using BepInEx;
 using HarmonyLib;
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace EpicTitles
 {
@@ -26,7 +30,8 @@ namespace EpicTitles
             if (levelInt % 10 == 0){
                 message = string.Format("I'm {0} {1} now. ({2})", rank, title, levelInt);
                 // TODO use Message() on Player class!
-                ShowMessage(message);
+                _instance.Message(MessageHud.MessageType.Center, message);
+                // ShowMessage(message);
             }
 
             // send update to the server
@@ -50,6 +55,16 @@ namespace EpicTitles
         public static void ShowMessage(string message){
             // TODO use Message() on Player class!
             MessageHud.instance.ShowMessage(MessageHud.MessageType.Center, message);
+        }
+
+        public static List<Player> getAllPlayers(){
+            return Player.GetAllPlayers();
+        }
+
+        public static void sendMessageToPlayer(long playerId, string message){
+            // Not viable for now :(
+            // player.Message(MessageHud.MessageType.Center, message);
+            return ;
         }
     }
 }

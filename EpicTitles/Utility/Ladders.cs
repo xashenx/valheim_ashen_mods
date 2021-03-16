@@ -75,9 +75,10 @@ namespace EpicTitles
                         // peer.m_rpc.Invoke(peer.m_uid, "SkillUpdate", Player.m_localPlayer.GetPlayerName(), String.Format("{0}", skill), (int)level);
                         continue;
                     }
+                    // Not viable for now :(
+                    // PatchedPlayer.sendMessageToPlayer(peer.m_uid, message);
                     ZRoutedRpc.instance.InvokeRoutedRPC(peer.m_uid, "SkillRankUpNotification", message);
                     // EpicTitles.Log.LogInfo($"SkillRankUpNotification sent to {peer.m_playerName}");
-                    // peer.m_rpc.Invoke("OnServerRemovePin", (object) ExplorationDatabase.PackPin(pin));
                     // ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.Everybody, "SkillUpdate", Player.m_localPlayer.GetPlayerName(), String.Format("{0}", skill), (int)level);
                 }
             }
