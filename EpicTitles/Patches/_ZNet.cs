@@ -21,7 +21,8 @@ namespace EpicTitles
             // try
             // {
                 if (__instance.IsServer()) {
-                    ZRoutedRpc.instance.Register<String, String, int>("SkillUpdate", LaddersHandler.OnClientSkillUpdate);
+                    ZRoutedRpc.instance.Register<String, ZPackage>("SkillUpdate", LaddersHandler.OnClientSkillUpdate);
+                    // ZRoutedRpc.instance.Register<String, String, int>("SkillUpdate", LaddersHandler.OnClientSkillUpdate);
                     ZRoutedRpc.instance.Register<String, String>("LadderRequest", LaddersHandler.OnClientLadderRequest);
                     LaddersHandler.loadSkillLadder();
                     // EpicTitles.Log.LogInfo("ZNet patched for server side");

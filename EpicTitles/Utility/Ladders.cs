@@ -50,7 +50,7 @@ namespace EpicTitles
             if (request.Length < 8)
                 response = listAvailableLadders();
             else {
-                string ladderName = request.Substring(7);
+                string ladderName = request.Substring(7).ToLower();
                 // EpicTitles.Log.LogInfo($"Skill ladder request from {sender}: {ladderName}");
                 if (skillLadders.ContainsKey(ladderName))
                     response = getSkillLadder(ladderName, playerName: player);
@@ -132,21 +132,69 @@ namespace EpicTitles
             PatchedConsole.writeOnChat(message);
         }
 
-        public static void OnClientSkillUpdate(long sender, String playerName, String skill, int level){
-            // EpicTitles.Log.LogInfo($"Received SkillUpdate from {playerName} on {skill}:{level}");
-            var byteLevel = (byte)level;
-            if (byteLevel % 10 == 0) {
-                // send the notification to other peers
-                // EpicTitles.Log.LogInfo($"Sending notification of SkillRankUp of {playerName} on {skill}");
-                var _playerName = playerName;
-                if (playerName == "Tomu") _playerName = "Paloma";
-                // TODO use Message() on Player class!
-                NotifityOtherClients(sender, $"{_playerName} is now a {PatchedSkills.getSkillRank(byteLevel)} {PatchedSkills.getSkillTitle(skill)}!");
+        // public static void OnClientSkillUpdate(long sender, String playerName, String skill, int level){
+        //     // EpicTitles.Log.LogInfo($"Received SkillUpdate from {playerName} on {skill}:{level}");
+        //     var byteLevel = (byte)level;
+        //     if (byteLevel % 10 == 0) {
+        //         // send the notification to other peers
+        //         // EpicTitles.Log.LogInfo($"Sending notification of SkillRankUp of {playerName} on {skill}");
+        //         var _playerName = playerName;
+        //         if (playerName == "Tomu") _playerName = "Paloma";
+        //         // TODO use Message() on Player class!
+        //         NotifityOtherClients(sender, $"{_playerName} is now a {PatchedSkills.getSkillRank(byteLevel)} {PatchedSkills.getSkillTitle(skill)}!");
+        //     }
+
+        //     updateLadder(playerName, skill, byteLevel);
+        //     // if (skillLadders.ContainsKey(skill))
+        //     //     skillLadders[skill][playerName] = byteLevel;
+        //     // else
+        //     //     skillLadders[skill] = new Dictionary<string, byte>(){{playerName, byteLevel}};
+        // }
+
+        // public static void OnSpawnedClientSkillUpdate(long sender, String playerName, ZPackage pkg){
+        public static void OnClientSkillUpdate(long sender, String playerName, ZPackage pkg){
+            if (pkg != null && pkg.Size() > 0) {
+                int numLines = pkg.ReadInt();
+                if (numLines == 0) {
+                    EpicTitles.Log.LogError("Got zero line config file from server. Cannot load.");
+                    return;
+                }
+
+                for (int i = 0; i < numLines; i++)  {
+                    string line = pkg.ReadString();
+                    string [] words = line.Split(':');
+                    string skill = words[0].ToLower();
+                    byte level = Byte.Parse(words[1]);
+                    
+                    EpicTitles.Log.LogInfo($"{playerName}|RECEIVED SKILL:{skill}:{level}");
+
+                    updateLadder(playerName, skill, level);
+                    
+                    // if (skillLadders.ContainsKey(skill))
+                    //     skillLadders[skill][playerName] = byteLevel;
+                    // else
+                    //     skillLadders[skill] = new Dictionary<string, byte>(){{playerName, byteLevel}};
+                    if (numLines == 0) { // OnSkillLevelup
+                        if (level % 10 == 0) {
+                            // send the notification to other peers
+                            // EpicTitles.Log.LogInfo($"Sending notification of SkillRankUp of {playerName} on {skill}");
+                            var _playerName = playerName;
+                            if (playerName == "Tomu") _playerName = "Paloma";
+                            // TODO use Message() on Player class!
+                            NotifityOtherClients(sender, $"{_playerName} is now a {PatchedSkills.getSkillRank(level)} {PatchedSkills.getSkillTitle(skill)}!");
+                        }
+                    }
+                }
+                // EpicTitles.Log.LogError($"{playerName}: {item.m_info.m_skill}=>{item.m_level}");
+                // item.m_info.m_icon SKILL ICON!
             }
+        }
+
+        private static void updateLadder(string player, string skill, byte level){
             if (skillLadders.ContainsKey(skill))
-                skillLadders[skill][playerName] = byteLevel;
+                skillLadders[skill][player] = level;
             else
-                skillLadders[skill] = new Dictionary<string, byte>(){{playerName, byteLevel}};
+                skillLadders[skill] = new Dictionary<string, byte>(){{player, level}};
         }
 
         public static void SkillRankUpNotification(long sender, String message){
