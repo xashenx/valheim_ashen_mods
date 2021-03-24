@@ -121,7 +121,8 @@ namespace EpicTitles
             var skills = Player.m_localPlayer.GetSkills().GetSkillList();
 
             foreach (var item in skills) {
-                EpicTitles.Log.LogInfo($"{item.m_info.m_skill}={type}?{item.m_info.m_skill == type}");
+                // EpicTitles.Log.LogInfo($"{item.m_info.m_skill}={type}?{item.m_info.m_skill == type}");
+                // EpicTitles.Log.LogInfo($"{item.m_info.m_description}");
                 if (item.m_info.m_skill == type){
                     EpicTitles.Log.LogInfo(item.m_info.m_icon);
                     return item.m_info.m_icon;

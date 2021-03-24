@@ -61,9 +61,11 @@ namespace EpicTitles
             ZRoutedRpc.instance.InvokeRoutedRPC(sender, "LadderResponse", response);
         }
 
-        static void NotifityOtherClients(long sender, String playerName, String message){
+        static void NotifityOtherClients(long sender, String playerName, String skill, byte level){
             var znet =  Traverse.Create(typeof(ZNet)).Field("m_instance").GetValue() as ZNet;
             var mPeers = Traverse.Create((znet)).Field("m_peers").GetValue() as List<ZNetPeer>;
+
+            var message = $"{playerName} is now a {PatchedSkills.getSkillRank(level)} {PatchedSkills.getSkillTitle(skill.ToLower())}!";
 
             foreach (var peer in mPeers)
             {
@@ -73,11 +75,12 @@ namespace EpicTitles
                     {
                         // EpicTitles.Log.LogInfo("sender == peer; Skip notification");
                         // peer.m_rpc.Invoke(peer.m_uid, "SkillUpdate", Player.m_localPlayer.GetPlayerName(), String.Format("{0}", skill), (int)level);
+                        // ZRoutedRpc.instance.InvokeRoutedRPC(peer.m_uid, "SkillRankUpNotification", playerName, skill, message);
                         continue;
                     }
                     // Not viable for now :(
                     // PatchedPlayer.sendMessageToPlayer(peer.m_uid, message);
-                    ZRoutedRpc.instance.InvokeRoutedRPC(peer.m_uid, "SkillRankUpNotification", playerName, message);
+                    ZRoutedRpc.instance.InvokeRoutedRPC(peer.m_uid, "SkillRankUpNotification", skill, message);
                     // EpicTitles.Log.LogInfo($"SkillRankUpNotification sent to {peer.m_playerName}");
                     // ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.Everybody, "SkillUpdate", Player.m_localPlayer.GetPlayerName(), String.Format("{0}", skill), (int)level);
                 }
@@ -164,24 +167,25 @@ namespace EpicTitles
                     string line = pkg.ReadString();
                     string [] words = line.Split(':');
                     string skill = words[0].ToLower();
+                    string _skill = words[0];
                     byte level = Byte.Parse(words[1]);
                     
-                    EpicTitles.Log.LogInfo($"{playerName}|RECEIVED SKILL:{skill}:{level}");
+                    EpicTitles.Log.LogInfo($"{playerName}|RECEIVED SKILL:{_skill}:{level}");
 
                     updateLadder(playerName, skill, level);
-                    
+
                     // if (skillLadders.ContainsKey(skill))
                     //     skillLadders[skill][playerName] = byteLevel;
                     // else
                     //     skillLadders[skill] = new Dictionary<string, byte>(){{playerName, byteLevel}};
-                    if (numLines == 0) { // OnSkillLevelup
+                    if (numLines == 1) { // OnSkillLevelup
                         if (level % 10 == 0) {
                             // send the notification to other peers
                             // EpicTitles.Log.LogInfo($"Sending notification of SkillRankUp of {playerName} on {skill}");
                             var _playerName = playerName;
                             if (playerName == "Tomu") _playerName = "Paloma";
                             // TODO use Message() on Player class!
-                            NotifityOtherClients(sender, _playerName, $"{_playerName} is now a {PatchedSkills.getSkillRank(level)} {PatchedSkills.getSkillTitle(skill)}!");
+                            NotifityOtherClients(sender, _playerName, _skill, level);
                         }
                     }
                 }
@@ -197,9 +201,11 @@ namespace EpicTitles
                 skillLadders[skill] = new Dictionary<string, byte>(){{player, level}};
         }
 
-        public static void SkillRankUpNotification(long sender, String playerName, String message){
+        public static void SkillRankUpNotification(long sender, String skill, String message){
             // EpicTitles.Log.LogInfo($"SkillRankUpNotification: {message}");
-            PatchedPlayer.ShowMessage(playerName, message);
+            Skills.SkillType _skillType = (Skills.SkillType) Enum.Parse(typeof(Skills.SkillType), skill, true);
+            var icon = PatchedSkills.getSkillIcon(_skillType);
+            PatchedPlayer.ShowMessage(skill, message, icon: icon);
         }
     }
 }

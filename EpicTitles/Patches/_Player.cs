@@ -58,8 +58,8 @@ namespace EpicTitles
             pkg.Write(1);
 
             // check if a new rank has been acquired
-            if (levelInt % 1 == 0){
-                message = $"{rank}{title}";
+            if (levelInt % 10 == 0){
+                message = $"{rank} {title}!";
                 // TODO use Message() on Player class!
                 // _instance.Message(, message);
                 var icon = PatchedSkills.getSkillIcon(skill);
@@ -92,14 +92,14 @@ namespace EpicTitles
             // }
         }
 
-        public static void ShowMessage(string playerName, string message, Sprite icon = null){
+        public static void ShowMessage(string skill, string message, Sprite icon = null){
             // TODO use Message() on Player class!
             // MessageHud.instance.ShowMessage(MessageHud.MessageType.Center, message);
             if (icon){
                 // EpicTitles.Log.LogInfo(icon);
                 // MessageHud.instance.ShowMessage(MessageHud.MessageType.Center, message, 5, icon);
                 // MessageHud.instance.QueueUnlockMsg(icon, playerName, message);
-                if (playerName == "self"){
+                if (skill == "self"){
                     MessageHud.instance.ShowBiomeFoundMsg(message, true);
                     GameObject prefab = ZNetScene.instance.GetPrefab("vfx_Potion_health_medium");
                     if (prefab != null)
@@ -108,11 +108,11 @@ namespace EpicTitles
                     }
                 }
                 else
-                    MessageHud.instance.QueueUnlockMsg(icon, playerName, message);
+                    MessageHud.instance.QueueUnlockMsg(icon, skill, message);
             }
             else
                 // MessageHud.instance.ShowMessage(MessageHud.MessageType.Center, message);
-                MessageHud.instance.QueueUnlockMsg(null, playerName, message);
+                MessageHud.instance.QueueUnlockMsg(null, skill, message);
             // Mod.PlayEffect(Mod.effectFeedbackEnabled.Value, "vfx_Potion_health_medium", targetContainer.transform.position);
         }
 
