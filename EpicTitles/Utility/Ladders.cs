@@ -61,7 +61,7 @@ namespace EpicTitles
             ZRoutedRpc.instance.InvokeRoutedRPC(sender, "LadderResponse", response);
         }
 
-        static void NotifityOtherClients(long sender, String message){
+        static void NotifityOtherClients(long sender, String playerName, String message){
             var znet =  Traverse.Create(typeof(ZNet)).Field("m_instance").GetValue() as ZNet;
             var mPeers = Traverse.Create((znet)).Field("m_peers").GetValue() as List<ZNetPeer>;
 
@@ -77,7 +77,7 @@ namespace EpicTitles
                     }
                     // Not viable for now :(
                     // PatchedPlayer.sendMessageToPlayer(peer.m_uid, message);
-                    ZRoutedRpc.instance.InvokeRoutedRPC(peer.m_uid, "SkillRankUpNotification", message);
+                    ZRoutedRpc.instance.InvokeRoutedRPC(peer.m_uid, "SkillRankUpNotification", playerName, message);
                     // EpicTitles.Log.LogInfo($"SkillRankUpNotification sent to {peer.m_playerName}");
                     // ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.Everybody, "SkillUpdate", Player.m_localPlayer.GetPlayerName(), String.Format("{0}", skill), (int)level);
                 }
@@ -181,7 +181,7 @@ namespace EpicTitles
                             var _playerName = playerName;
                             if (playerName == "Tomu") _playerName = "Paloma";
                             // TODO use Message() on Player class!
-                            NotifityOtherClients(sender, $"{_playerName} is now a {PatchedSkills.getSkillRank(level)} {PatchedSkills.getSkillTitle(skill)}!");
+                            NotifityOtherClients(sender, _playerName, $"{_playerName} is now a {PatchedSkills.getSkillRank(level)} {PatchedSkills.getSkillTitle(skill)}!");
                         }
                     }
                 }
@@ -197,9 +197,9 @@ namespace EpicTitles
                 skillLadders[skill] = new Dictionary<string, byte>(){{player, level}};
         }
 
-        public static void SkillRankUpNotification(long sender, String message){
+        public static void SkillRankUpNotification(long sender, String playerName, String message){
             // EpicTitles.Log.LogInfo($"SkillRankUpNotification: {message}");
-            PatchedPlayer.ShowMessage(message);
+            PatchedPlayer.ShowMessage(playerName, message);
         }
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace EpicTitles
 {
@@ -57,11 +58,14 @@ namespace EpicTitles
             pkg.Write(1);
 
             // check if a new rank has been acquired
-            if (levelInt % 10 == 0){
-                message = string.Format("I'm {0} {1} now. ({2})", rank, title, levelInt);
+            if (levelInt % 1 == 0){
+                message = $"{rank}{title}";
                 // TODO use Message() on Player class!
-                _instance.Message(MessageHud.MessageType.Center, message);
-                // ShowMessage(message);
+                // _instance.Message(, message);
+                var icon = PatchedSkills.getSkillIcon(skill);
+                // MessageHud.MessageType type, string msg, int amount = 0, icon = null)
+                
+                ShowMessage("self", message, icon: icon);
             }
 
             pkg.Write($"{skill.ToString()}:{(byte)level}");
@@ -88,9 +92,28 @@ namespace EpicTitles
             // }
         }
 
-        public static void ShowMessage(string message){
+        public static void ShowMessage(string playerName, string message, Sprite icon = null){
             // TODO use Message() on Player class!
-            MessageHud.instance.ShowMessage(MessageHud.MessageType.Center, message);
+            // MessageHud.instance.ShowMessage(MessageHud.MessageType.Center, message);
+            if (icon){
+                // EpicTitles.Log.LogInfo(icon);
+                // MessageHud.instance.ShowMessage(MessageHud.MessageType.Center, message, 5, icon);
+                // MessageHud.instance.QueueUnlockMsg(icon, playerName, message);
+                if (playerName == "self"){
+                    MessageHud.instance.ShowBiomeFoundMsg(message, true);
+                    GameObject prefab = ZNetScene.instance.GetPrefab("vfx_Potion_health_medium");
+                    if (prefab != null)
+                    {
+                        UnityEngine.Object.Instantiate<GameObject>(prefab, _instance.transform.position, Quaternion.identity);
+                    }
+                }
+                else
+                    MessageHud.instance.QueueUnlockMsg(icon, playerName, message);
+            }
+            else
+                // MessageHud.instance.ShowMessage(MessageHud.MessageType.Center, message);
+                MessageHud.instance.QueueUnlockMsg(null, playerName, message);
+            // Mod.PlayEffect(Mod.effectFeedbackEnabled.Value, "vfx_Potion_health_medium", targetContainer.transform.position);
         }
 
         public static List<Player> getAllPlayers(){

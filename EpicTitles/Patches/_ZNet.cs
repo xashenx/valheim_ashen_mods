@@ -28,7 +28,7 @@ namespace EpicTitles
                     // EpicTitles.Log.LogInfo("ZNet patched for server side");
                 }
                 else {
-                    ZRoutedRpc.instance.Register<String>("SkillRankUpNotification", LaddersHandler.SkillRankUpNotification);
+                    ZRoutedRpc.instance.Register<String, String>("SkillRankUpNotification", LaddersHandler.SkillRankUpNotification);
                     ZRoutedRpc.instance.Register<String>("LadderResponse", LaddersHandler.LadderResponse);
                     // EpicTitles.Log.LogInfo("ZNet patched for client side");
                 }

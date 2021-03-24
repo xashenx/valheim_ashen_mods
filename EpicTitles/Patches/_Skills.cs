@@ -1,6 +1,7 @@
 using BepInEx;
 using HarmonyLib;
 using System;
+using UnityEngine;
 // using System.IO;
 // using System.Linq;
 // using System.Collections.Generic;
@@ -114,6 +115,19 @@ namespace EpicTitles
                     break;
             }
             return title;
+        }
+
+        public static Sprite getSkillIcon(Skills.SkillType type){
+            var skills = Player.m_localPlayer.GetSkills().GetSkillList();
+
+            foreach (var item in skills) {
+                EpicTitles.Log.LogInfo($"{item.m_info.m_skill}={type}?{item.m_info.m_skill == type}");
+                if (item.m_info.m_skill == type){
+                    EpicTitles.Log.LogInfo(item.m_info.m_icon);
+                    return item.m_info.m_icon;
+                }
+            }
+            return null;
         }
     }
 }
