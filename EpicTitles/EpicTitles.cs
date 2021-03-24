@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace EpicTitles
 {
-    [BepInPlugin("net.bdew.valheim.epictitles", "EpicTitles", "1.1.0")]
+    [BepInPlugin("net.bdew.valheim.epictitles", "EpicTitles", "1.1.2")]
     public class EpicTitles : BaseUnityPlugin {
         // public ETLogger mylogger;
         public static ManualLogSource Log;
